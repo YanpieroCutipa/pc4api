@@ -1,10 +1,17 @@
 using Microsoft.Extensions.ML;
 using SentimentAnalysis;
 using Microsoft.OpenApi.Models;
+using pc4api.Data;
+using pc4api.Service;
+using pc4api_ML;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddPredictionEnginePool<MLModel1.ModelInput, MLModel1.ModelOutput>()
     .FromFile("MLModel1.mlnet");
+builder.Services.AddPredictionEnginePool<ProductoRating, ProductoRatingPrediction>()
+    .FromFile("MLRecomendation.mlnet");
+
+builder.Services.AddSingleton<Productos>();
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -15,7 +22,9 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "My API", Description = "Docs for my API", Version = "v1" });
 });
+
 var app = builder.Build();
+
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -40,7 +49,7 @@ app.UseSwaggerUI(c =>
 });
 
 app.MapPost("/predict",
-    async (PredictionEnginePool<MLModel1.ModelInput, MLModel1.ModelOutput> predictionEnginePool, MLModel1.ModelInput input) =>
+    async (PredictionEnginePool<ProductoRating, ProductoRatingPrediction> predictionEnginePool, ProductoRating input) =>
         await Task.FromResult(predictionEnginePool.Predict(input)));
 
 app.MapControllerRoute(

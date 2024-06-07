@@ -1,0 +1,93 @@
+@{
+    ViewData["Title"] = "Análisis de Recomendación y Tendencia";
+    var ratings = ViewData["ratings"] as List<(int productoId, float normalizedScore)>;
+    var trendingProductos = ViewData["trendingproductos"] as List<pc4api.Models.Producto>;
+}
+
+<h1 class="text-center mt-4">@ViewData["Title"]</h1>
+
+<p class="text-center mt-4">Inserte un ID de producto (valores 1-20)</p>
+
+<div class="container mt-3">
+    <form asp-controller="ML2" asp-action="Predict" method="post" class="rounded p-4" style="max-width: 400px; margin: 0 auto;">
+        <div class="form-group text-center">
+            <label for="id">ID Usuario</label>
+            <input type="text" class="form-control" id="id" name="id" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100 mt-2">Enviar</button>
+    </form>
+</div>
+
+@if (ratings != null && ratings.Count > 0)
+{
+    <h2 class="text-center mt-4">Recomendación tipo de llantas</h2>
+
+    <div class="table-responsive">
+        <table class="table table-striped mt-3">
+            <thead>
+                <tr>
+                    <th scope="col">ID Producto</th>
+                    <th scope="col">Nombre del Producto (Marca de Llanta)</th>
+                    <th scope="col">Recomendación</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var rating in ratings)
+                {
+                    var producto = trendingProductos.FirstOrDefault(p => p.ProductoId == rating.productoId);
+                    <tr>
+                        <td>@rating.productoId</td>
+                        <td>@producto?.NombreProducto</td>
+                        <td>@rating.normalizedScore</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+else
+{
+    <p class="text-center mt-4">Sin Recomendación</p>
+}
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2 class="text-center">Lista de Marcas de Llantas en Tendencia de Acuerdo a Recomendación</h2>
+
+            @if (trendingProductos != null && trendingProductos.Count > 0)
+            {
+                <ul class="list-group mt-3">
+                    @foreach (var producto in trendingProductos)
+                    {
+                        <li class="list-group-item">@producto.NombreProducto</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <p class="text-center mt-4">Aún no hay una Marca de Llanta en Tendencia</p>
+            }
+        </div>
+    </div>
+</div>
+
+<style>
+    .card-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .card-body {
+        padding: 20px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border: none;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .container {
+        max-width: 800px;
+    }
+</style>
